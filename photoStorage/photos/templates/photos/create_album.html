@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Создать альбом</title>
+</head>
+<body>
+    <h1>Создать новый альбом</h1>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <label for="{{ form.name.id_for_label }}">Название альбома:</label><br>
+            {{ form.name }}
+        </p>
+        <p>
+            <label for="{{ form.description.id_for_label }}">Описание:</label><br>
+            {{ form.description }}
+        </p>
+        <p>
+            <strong>Выберите фотографии:</strong><br>
+            {% for checkbox in form.photos %}
+                <div>
+                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                </div>
+            {% endfor %}
+        </p>
+        <button type="submit">Создать альбом</button>
+    </form>
+</body>
+</html>

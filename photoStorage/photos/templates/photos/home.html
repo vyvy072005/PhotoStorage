@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <title>Главная страница</title>
     <style>
+
+
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f0f4f8;
@@ -416,6 +418,228 @@ button[type="button"] {
 body.modal-open {
     overflow: hidden;
 }
+.albums-section {
+    margin: 30px 0;
+}
+
+.albums-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 0 10px;
+}
+
+.album-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.album-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.album-cover {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.album-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.album-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.album-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.photo-count {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.album-description {
+    margin: 5px 0 0 0;
+    color: #888;
+    font-size: 0.85em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.empty-state a {
+    color: #007bff;
+    text-decoration: underline;
+}
+        .albums-section {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 10px;
+}
+
+.album-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.album-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.album-cover {
+    height: 220px;
+    background: #f5f5f5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 2px;
+}
+
+.album-preview {
+    width: calc(33.333% - 2px);
+
+    object-fit: cover;
+    border-radius: 4px;
+    transition: opacity 0.2s ease;
+}
+
+.album-preview:hover {
+    opacity: 0.8;
+}
+
+.album-info {
+    padding: 18px;
+    text-align: center;
+}
+
+.album-name {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-stats {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.btn-create {
+    display: inline-block;
+    background: #4a6fa5;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.btn-create:hover {
+    background: #3a5a8a;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .albums-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 15px;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .albums-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .album-cover {
+        height: 180px;
+    }
+}
 
     </style>
 </head>
@@ -498,7 +722,37 @@ body.modal-open {
         {% endfor %}
     </ul>
 </section>
+<!-- Например, в home.html -->
 
+<!-- Раздел альбомов -->
+
+<div class="albums-section">
+    {% if albums %}
+        <h3 class="section-title">Ваши альбомы</h3>
+        <div class="albums-grid">
+            {% for album_data in albums %}
+                <div class="album-card">
+                    <a href="{% url 'view_album' album_data.album.id_album %}" class="album-link">
+                        <div class="album-cover">
+                            {% for preview_url in album_data.preview_urls %}
+                                <img src="{{ preview_url }}" alt="{{ album_data.album.name }}" class="album-preview">
+                {% endfor %}
+                </div>
+                <div class="album-info">
+                    <h4 class="album-name">{{ album_data.album.name }}</h4>
+<!--            <p class="album-stats">{{ album_data.photo_count }} фото</p>-->
+        </div>
+    </a>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>У вас пока нет альбомов.</p>
+    <a href="{% url 'create_album' %}" class="btn-create">Создать первый альбом</a>
+</div>
+{% endif %}
+</div>
 <!-- Модальное окно редактирования -->
 <div id="editModal" class="modal">
     <div class="modal-content">

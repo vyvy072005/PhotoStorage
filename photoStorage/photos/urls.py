@@ -19,4 +19,8 @@ urlpatterns = [
     path('api/photos/edit/', views.edit_photo, name='edit_photo'),
     path('api/photos/delete/<int:photo_id>/', views.delete_photo, name='delete_photo'),
 
+    path('create_album/', views.create_album, name='create_album'),
+    path('album/<int:album_id>/', views.view_album, name='view_album'),
+
+
 ]

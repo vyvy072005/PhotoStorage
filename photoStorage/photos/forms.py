@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 
-from .models import Photo, Tag, Category
+from .models import Photo, Tag, Category, Album
 
 from django import forms
 from .models import User
@@ -126,3 +126,37 @@ class PhotoForm(forms.ModelForm):
                 photo.tags.set(tags_to_add)
 
         return photo
+
+# class AlbumCreateForm(forms.ModelForm):
+#     photos = forms.ModelMultipleChoiceField(
+#         queryset=Photo.objects.all(),
+#         widget=forms.CheckboxSelectMultiple,
+#         required=False
+#     )
+#
+#     class Meta:
+#         model = Album
+#         fields = ['name', 'description', 'photos']
+
+class AlbumCreateForm(forms.ModelForm):
+    photos = forms.ModelMultipleChoiceField(
+        queryset=Photo.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'style': 'display:none;'}),
+        required=False
+    )
+
+    class Meta:
+        model = Album
+        fields = ['name', 'description', 'photos']
+
+
+class AlbumForm(forms.ModelForm):
+    photos = forms.ModelMultipleChoiceField(
+        queryset=Photo.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = Album
+        fields = ['name', 'description', 'photos']

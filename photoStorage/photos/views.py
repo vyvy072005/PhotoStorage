@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from .forms import RegistrationForm, PhotoForm
+from .forms import RegistrationForm, PhotoForm, AlbumCreateForm, AlbumForm
 from .models import Category, Tag, User, PhotoTag, Photo, AlbumPhoto, Album
 from django.conf import settings
 
@@ -21,34 +21,55 @@ from django.conf import settings
 #     return render(request, 'photos//home.html')
 @login_required
 def home(request):
+    # Получаем альбомы текущего пользователя
+    albums = Album.objects.filter(id_user=request.user).prefetch_related(
+        'albumphoto_set__id_photo'
+    ).order_by('-id_album')
+
     # Фильтруем фотографии по текущему пользователю
     photos = Photo.objects.select_related(
         'id_category', 'id_user'
     ).filter(
-        id_user=request.user  # Только фото текущего пользователя
+        id_user=request.user
     ).order_by('-date')
 
-    # Обрабатываем каждую фотографию
+    # Обрабатываем фотографии
     processed_photos = []
     for photo in photos:
-        # Проверяем, есть ли изображение
         if photo.image:
-            # Формируем Data URL
             data_url = f"data:image/jpeg;base64,{photo.image}"
         else:
-            # Заглушка, если изображения нет
             data_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQmV0aGVsb3YiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm5vIGltYWdlPC90ZXh0Pjwvc3ZnPg=='
-
         processed_photos.append({
             'photo': photo,
             'image_url': data_url
         })
 
+    # Подготавливаем данные для альбомов
+    processed_albums = []
+    for album in albums:
+        album_photos = list(album.albumphoto_set.all()[:3])  # Первые 3 фото для превью
+        preview_urls = []
+        for ap in album_photos:
+            photo = ap.id_photo
+            if photo.image:
+                preview_urls.append(f"data:image/jpeg;base64,{photo.image}")
+            else:
+                preview_urls.append('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQmV0aGVsb3YiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm5vIGltYWdlPC90ZXh0Pjwvc3ZnPg==')
+        processed_albums.append({
+            'album': album,
+            'preview_urls': preview_urls,
+            'photo_count': len(album_photos)
+        })
+
     context = {
         'processed_photos': processed_photos,
-        'total_photos': len(processed_photos),  # Количество фото текущего пользователя
+        'total_photos': len(processed_photos),
+        'albums': processed_albums,
+        'total_albums': len(albums),
     }
     return render(request, 'photos/home.html', context)
+
 
 
 def register(request):
@@ -347,3 +368,69 @@ def delete_photo(request, photo_id):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+
+
+# def create_album(request):
+#     if request.method == 'POST':
+#         form = AlbumCreateForm(request.POST)
+#         if form.is_valid():
+#             album = form.save(commit=False)
+#             album.id_user = request.user
+#             album.save()
+#             # Добавляем выбранные фото в альбом
+#             for photo in form.cleaned_data['photos']:
+#                 AlbumPhoto.objects.create(id_album=album, id_photo=photo)
+#             return redirect('home')  # или на страницу альбома
+#     else:
+#         form = AlbumCreateForm()
+#     return render(request, 'photos//create_album.html', {'form': form})
+
+# @login_required
+# def create_album(request):
+#     if request.method == 'POST':
+#         form = AlbumCreateForm(request.POST)
+#         if form.is_valid():
+#             album = form.save(commit=False)
+#             album.id_user = request.user
+#             album.save()
+#             # Связываем фото с альбомом
+#             for photo in form.cleaned_data['photos']:
+#                 AlbumPhoto.objects.create(id_album=album, id_photo=photo)
+#             return redirect('home')  # или куда нужно
+#     else:
+#         form = AlbumCreateForm()
+#
+#     photos = Photo.objects.all()  # все фото для отображения
+#
+#     return render(request, 'photos/create_album.html', {'form': form, 'photos': photos})
+@login_required
+def create_album(request):
+    if request.method == 'POST':
+        form = AlbumForm(request.POST)
+        if form.is_valid():
+            album = form.save(commit=False)
+            album.id_user = request.user
+            album.save()
+            # Добавляем выбранные фото в альбом
+            photos = form.cleaned_data['photos']
+            for photo in photos:
+                AlbumPhoto.objects.create(id_album=album, id_photo=photo)
+            return redirect('home')  # или другая страница
+    else:
+        form = AlbumForm()
+    return render(request, 'photos/create_album.html', {'form': form})
+def view_album(request, album_id):
+    album = get_object_or_404(Album, id_album=album_id, id_user=request.user)
+    # Получаем фото альбома через промежуточную модель
+    album_photos = album.albumphoto_set.select_related('id_photo').all()
+    photos = [ap.id_photo for ap in album_photos]
+
+    context = {
+        'album': album,
+        'photos': photos,
+    }
+    return render(request, 'photos/view_album.html', context)
+
+
