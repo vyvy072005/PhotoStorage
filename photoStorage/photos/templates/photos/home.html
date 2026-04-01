@@ -1,0 +1,907 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Главная страница</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .welcome {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Кнопки верхнего меню */
+        .top-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .top-buttons a {
+            padding: 12px 24px;
+            background-color: #2980b9;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .top-buttons a:hover {
+            background-color: #3498db;
+        }
+
+        /* Стиль для формы добавления фотографии */
+        .add-photo-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+        .add-photo-form h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2980b9;
+            text-align: center;
+        }
+        .add-photo-form input,
+        .add-photo-form select,
+        .add-photo-form textarea,
+        .add-photo-form button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        .add-photo-form button {
+            background-color: #2980b9;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .add-photo-form button:hover {
+            background-color: #3498db;
+        }
+
+        /* Стиль для сортировки и фильтрации фотографий */
+        .photos-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .photos-controls button {
+            padding: 10px 20px;
+            background-color: #16a085;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .photos-controls button:hover {
+            background-color: #1abc9c;
+        }
+
+        /* Стиль для списка фотографий */
+        .photos-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0;
+            list-style: none;
+        }
+        .photo-item {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .photo-item:hover {
+            transform: scale(1.02);
+        }
+        .photo-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .photo-info {
+            padding: 10px;
+        }
+        .photo-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .photo-details {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* Для адаптивности */
+        @media(max-width: 600px) {
+            .top-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .top-buttons a {
+                width: 80%;
+                text-align: center;
+            }
+        }
+        /* Контейнер меню пользователя */
+.user-menu {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* Кнопка вызова меню */
+.user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.user-toggle:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Имя пользователя в кнопке */
+.username {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Стрелочка вниз */
+.arrow {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* Выпадающее меню */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 150px;
+    overflow: hidden;
+    display: none; /* Изначально скрыто */
+    z-index: 1001;
+}
+
+/* Пункты меню */
+.dropdown-menu a {
+    display: block;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+/* Ховер для пунктов меню */
+.dropdown-menu a:hover {
+    background-color: #f8f9fa;
+}
+
+/* Стили для ссылки «Выйти» */
+.dropdown-menu a[href*="logout"] {
+    color: #dc3545;
+    border-top: 1px solid #eee;
+}
+
+.dropdown-menu a[href*="logout"]:hover {
+    background-color: #fff5f5;
+    color: #c82333;
+}
+        .logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    color: #dc3545;
+    font: inherit;
+    border-top: 1px solid #eee;
+}
+
+.logout-btn:hover {
+    background-color: #fff5f5;
+}
+.sort-btn {
+    padding: 10px 15px;
+    margin: 0 5px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.sort-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+}
+
+.sort-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Стили для загрузки */
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #666;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.close {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.photo-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.photo-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Стили формы */
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input[type="text"], textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+}
+
+button[type="button"] {
+    background-color: #dc3545;
+    color: white;
+    margin-left: 10px;
+}
+        .photo-preview {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.photo-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filename {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.modal {
+    display: none; /* изначально скрыто */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* затемнение фона */
+    overflow-y: auto; /* вертикальная прокрутка */
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto; /* отступ сверху/снизу 5 %, по горизонтали — автоцентрирование */
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%; /* максимальная ширина */
+    max-height: 90vh; /* максимальная высота — 90 % от высоты экрана */
+    overflow-y: auto; /* прокрутка внутри контента */
+    position: relative;
+}
+
+/* Стили для полосы прокрутки (опционально) */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+        .modal-body {
+    max-height: calc(90vh - 100px); /* 90 % высоты экрана минус отступ для заголовка и кнопок */
+    overflow-y: auto;
+    padding-right: 10px; /* место для скроллбара */
+}
+
+/* Убираем скроллбар у основного контента при открытом модальном окне */
+body.modal-open {
+    overflow: hidden;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Информационная система для хранения и каталогизации фотографий!</h1>
+    </header>
+    <div class="user-menu">
+    <button class="user-toggle" type="button">
+        <span class="username">Привет, {{ user.name }}!</span>
+        <span class="arrow">▼</span>
+    </button>
+    <div class="dropdown-menu">
+        <a href="{% url 'profile' %}">Личный кабинет</a>
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Выйти</button>
+        </form>
+    </div>
+</div>
+
+    <div class="welcome">
+        Эта страница предназначена для добавления фотографий, создания альбомов и просмотра ваших фото с сортировкой.
+    </div>
+
+    <!-- Верхнее меню с кнопками -->
+    <div class="top-buttons">
+        <a href="{% url 'add_photo' %}">Добавить фото</a>
+        <a href="{% url 'create_album' %}">Создать альбом</a>
+    </div>
+
+    <!-- Форма для добавления фотографии -->
+
+<!-- Контроль сортировки и фильтров фотографий -->
+<section class="photos-controls">
+    <button data-sort="date" class="sort-btn active">По дате</button>
+    <button data-sort="album" class="sort-btn">По альбому</button>
+    <button data-sort="category" class="sort-btn">По категории</button>
+    <button data-sort="tag" class="sort-btn">По тегу</button>
+</section>
+
+<!-- Список фотографий -->
+<section>
+    <ul class="photos-list" id="photos-container">
+        {% for item in processed_photos %}
+            <li class="photo-item" data-photo-id="{{ item.photo.id_photo }}" onclick="openEditModal(this)">
+                <!-- Отображаем изображение из Base64 или заглушку -->
+                <img
+                    src="{{ item.image_url }}"
+            alt="{{ item.photo.title }}"
+            class="photo-img"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+                />
+                <div class="no-image" style="display: none;">
+                    Изображение отсутствует
+                </div>
+
+                <div class="photo-info">
+                    <div class="photo-title">{{ item.photo.title }}</div>
+                    <div class="photo-details">
+                <p>{{ item.photo.description|default:"Без описания" }}</p>
+                <p>Дата: {{ item.photo.date|date:"d.m.Y" }}</p>
+
+                <!-- Категория -->
+                <p>
+                    {% if item.photo.id_category %}
+                        Категория: {{ item.photo.id_category.name }}
+            {% else %}
+                        Категория: не указана
+            {% endif %}
+                </p>
+
+                <!-- Автор -->
+                <p>Автор: {{ item.photo.id_user.name }}</p>
+            </div>
+        </div>
+            </li>
+        {% empty %}
+            <li>В системе пока нет фотографий.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<!-- Модальное окно редактирования -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Редактирование фотографии</h2>
+
+        <div class="modal-body"> <!-- контейнер для прокрутки -->
+            <div class="photo-preview">
+                <img id="photoPreview" src="" alt="Превью фотографии">
+                <p id="photoFilename" class="filename"></p>
+            </div>
+
+            <form id="editPhotoForm">
+                {% csrf_token %}
+                <input type="hidden" id="photoId" name="photo_id">
+
+                <label for="editTitle">Название:</label>
+                <input type="text" id="editTitle" name="title" required>
+
+                <label for="editDescription">Описание:</label>
+                <textarea id="editDescription" name="description"></textarea>
+
+                <label for="editCategory">Категория:</label>
+                <select id="editCategory" name="category_id">
+                    <option value="">Не указана</option>
+            {% for category in categories %}
+                <option value="{{ category.id_category }}">{{ category.name }}</option>
+            {% endfor %}
+                </select>
+
+                <!-- Поле для загрузки нового изображения -->
+                <label for="editImage">Заменить изображение:</label>
+
+                <input type="file" id="editImage" name="image" accept="image/*">
+                <p id="fileInfo" style="display: none; color: #666; font-size: 0.9em;"></p>
+
+
+
+                <button type="submit">Сохранить изменения</button>
+                <button type="button" onclick="deletePhoto()">Удалить фото</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userToggle = document.querySelector('.user-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    // Открываем/закрываем меню при клике на кнопку
+    userToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.style.display =
+            dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Закрываем меню при клике вне его области
+    document.addEventListener('click', function() {
+        dropdownMenu.style.display = 'none';
+    });
+
+    // Предотвращаем закрытие при клике внутри меню
+    dropdownMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortButtons = document.querySelectorAll('.sort-btn');
+    const photosContainer = document.getElementById('photos-container');
+
+    // Обработчик клика по кнопкам сортировки
+    sortButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Убираем активный класс у всех кнопок
+            sortButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавляем активный класс текущей кнопке
+            this.classList.add('active');
+
+            const sortBy = this.getAttribute('data-sort');
+            loadSortedPhotos(sortBy);
+        });
+    });
+
+    // Функция загрузки отсортированных фотографий
+    async function loadSortedPhotos(sortField) {
+        try {
+            const response = await fetch(`/api/photos/sorted/?sort=${sortField}`);
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            const data = await response.json();
+            updatePhotoList(data.photos);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            photosContainer.innerHTML = '<li>Ошибка загрузки фотографий</li>';
+        }
+    }
+
+    // Функция обновления списка фотографий
+    function updatePhotoList(photos) {
+        if (photos.length === 0) {
+            photosContainer.innerHTML = '<li>По вашему запросу фотографий не найдено</li>';
+            return;
+        }
+
+        let html = '';
+        photos.forEach(item => {
+            html += `
+                <li class="photo-item">
+                    <img src="${item.image_url}" alt="${item.title}" class="photo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <div class="no-image" style="display: none;">Изображение отсутствует</div>
+            <div class="photo-info">
+                <div class="photo-title">${item.title}</div>
+                <div class="photo-details">
+                    <p>${item.description || 'Без описания'}</p>
+                    <p>Дата: ${item.date}</p>
+                    <p>Категория: ${item.category_name || 'не указана'}</p>
+            <p>Автор: ${item.username}</p>
+                </div>
+            </div>
+        </li>`;
+        });
+        photosContainer.innerHTML = html;
+    }
+});
+</script>
+<script>
+let currentPhotoId = null;
+
+// Открытие модального окна с данными фото
+function openEditModal(photoElement) {
+    // Логирование для отладки
+    console.log('=== ОТКРЫТИЕ МОДАЛЬНОГО ОКНА ===');
+    console.log('photoElement:', photoElement);
+
+    // Получаем ID фото
+    currentPhotoId = photoElement.dataset.photoId;
+    console.log('ID фото:', currentPhotoId);
+
+    // Безопасное получение данных с проверкой на null
+    const titleElement = photoElement.querySelector('.photo-title');
+    const descriptionElement = photoElement.querySelector('.photo-details p');
+    const categoryElement = photoElement.querySelector('.photo-details p:nth-child(3)');
+
+    const title = titleElement ? titleElement.textContent : '';
+    const description = descriptionElement ? descriptionElement.textContent : '';
+    const categoryText = categoryElement ? categoryElement.textContent : '';
+
+    // Извлекаем название категории
+    let categoryName = 'не указана';
+    if (categoryText && categoryText.includes('Категория: ')) {
+        categoryName = categoryText.replace('Категория: ', '');
+    }
+
+    // Получаем base64 из атрибута data
+    const base64FromElement = photoElement.dataset.imageBase64;
+    console.log('Base64 из data-атрибута:', base64FromElement ? 'есть' : 'нет');
+
+    // Элементы для управления видимостью
+    const previewImg = document.getElementById('photoPreview');
+    const noPhotoMessage = document.getElementById('noPhotoMessage');
+    const photoFilename = document.getElementById('photoFilename');
+
+    // Заполняем форму
+    const photoIdInput = document.getElementById('photoId');
+    const titleInput = document.getElementById('editTitle');
+    const descriptionInput = document.getElementById('editDescription');
+
+    if (photoIdInput) photoIdInput.value = currentPhotoId;
+    if (titleInput) titleInput.value = title;
+
+    // Безопасная обработка описания
+    if (descriptionInput) {
+        const cleanDescription = description === 'Без описания' ? '' : description;
+        descriptionInput.value = cleanDescription;
+    }
+
+    // Устанавливаем изображение в превью
+    if (previewImg && base64FromElement) {
+        // Определяем MIME-тип автоматически
+        let mimeType = 'jpeg';
+        if (base64FromElement.startsWith('iVBORw0K')) mimeType = 'png';
+        else if (base64FromElement.startsWith('/9j/')) mimeType = 'jpeg';
+        else if (base64FromElement.startsWith('R0lGODlh')) mimeType = 'gif';
+
+        // Устанавливаем src и показываем изображение
+        previewImg.src = `data:image/${mimeType};base64,${base64FromElement}`;
+        previewImg.style.display = 'block';
+        previewImg.alt = title || 'Фотография';
+
+        // Скрываем сообщение об отсутствии фото
+        if (noPhotoMessage) noPhotoMessage.style.display = 'none';
+        if (photoFilename) photoFilename.style.display = 'none';
+
+        // Обработка ошибки загрузки
+        previewImg.onerror = function() {
+            console.error('Ошибка загрузки base64 изображения:', this.src);
+            previewImg.style.display = 'none';
+            if (noPhotoMessage) {
+                noPhotoMessage.style.display = 'block';
+                noPhotoMessage.textContent = 'Ошибка загрузки изображения';
+            }
+        };
+    } else {
+        // Если base64 нет — показываем сообщение
+        if (previewImg) previewImg.style.display = 'none';
+        if (noPhotoMessage) noPhotoMessage.style.display = 'block';
+        if (photoFilename) photoFilename.style.display = 'none';
+    }
+
+    // Устанавливаем выбранную категорию
+    const categorySelect = document.getElementById('editCategory');
+    if (categorySelect) {
+        for (let option of categorySelect.options) {
+            if (option.text === categoryName) {
+                option.selected = true;
+                break;
+            }
+        }
+    }
+
+    // Показываем модальное окно
+    const editModal = document.getElementById('editModal');
+    if (editModal) {
+        editModal.style.display = 'block';
+    }
+}
+
+
+// Закрытие модального окна
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    document.body.classList.remove('modal-open'); // возвращаем скролл страницы
+    document.getElementById('editPhotoForm').reset();
+}
+
+document.getElementById('editPhotoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const fileInput = document.getElementById('editImage');
+    const file = fileInput.files[0];
+
+    // Добавляем ID фото
+    formData.append('photo_id', document.getElementById('photoId').value);
+    // Добавляем заголовок
+    formData.append('title', document.getElementById('editTitle').value);
+    // Добавляем описание
+    formData.append('description', document.getElementById('editDescription').value);
+    // Добавляем категорию
+    formData.append('category_id', document.getElementById('editCategory').value);
+
+    // Если загружен новый файл, добавляем его как файл (не base64)
+    if (file) {
+        formData.append('image', file); // отправляем файл напрямую
+    }
+
+    try {
+        const response = await fetch('/api/photos/edit/', {
+            method: 'POST',
+            body: formData,
+            // headers не нужны для FormData с файлами
+        });
+
+        if (!response.ok) throw new Error('Ошибка сохранения');
+
+        const result = await response.json();
+
+        if (result.success) {
+            updatePhotoInList(result.photo);
+            closeEditModal();
+            alert('Изменения сохранены!');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении');
+    }
+});
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Извлекаем только base64‑часть (после запятой)
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+// Удаление фотографии
+async function deletePhoto() {
+    if (!confirm('Вы уверены, что хотите удалить эту фотографию?')) return;
+
+    try {
+        const response = await fetch(`/api/photos/delete/${currentPhotoId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+
+        if (!response.ok) throw new Error('Ошибка удаления');
+
+        // Удаляем фото из списка
+        const photoElement = document.querySelector(`.photo-item[data-photo-id="${currentPhotoId}"]`);
+        if (photoElement) photoElement.remove();
+
+        closeEditModal();
+        alert('Фотография удалена!');
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка при удалении');
+    }
+}
+function updatePhotoInList(photoData) {
+    const photoElement = document.querySelector(`.photo-item[data-photo-id="${photoData.id_photo}"]`);
+
+    if (photoElement) {
+        // Обновляем заголовок
+        const titleElement = photoElement.querySelector('.photo-title');
+        if (titleElement) titleElement.textContent = photoData.title;
+
+        // Обновляем описание
+        const descriptionElement = photoElement.querySelector('.photo-details p');
+        if (descriptionElement) {
+            descriptionElement.textContent = photoData.description || 'Без описания';
+        }
+
+        // Обновляем категорию
+        const categoryElement = photoElement.querySelector('.photo-details p:nth-child(3)');
+        if (categoryElement) {
+            categoryElement.textContent = `Категория: ${photoData.category_name || 'не указана'}`;
+        }
+
+        // Обновляем изображение, если есть base64 в данных
+        if (photoData.image_base64) {
+            const imgElement = photoElement.querySelector('img');
+            if (imgElement) {
+                // Добавляем префикс только при отображении
+                imgElement.src = `data:image/jpeg;base64,${photoData.image_base64}`;
+                imgElement.alt = photoData.title;
+            }
+        }
+    }
+}
+// Закрытие модального окна при клике вне его области
+window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+        closeEditModal();
+    }
+};
+
+    function openEditModal(photoElement) {
+    currentPhotoId = photoElement.dataset.photoId;
+
+    // Получаем данные фото
+    const title = photoElement.querySelector('.photo-title').textContent;
+    const description = photoElement.querySelector('.photo-details p').textContent;
+    const categoryText = photoElement.querySelector('.photo-details p:nth-child(3)').textContent;
+
+
+    // Извлекаем название категории
+    let categoryName = 'не указана';
+    if (categoryText.includes('Категория: ')) {
+        categoryName = categoryText.replace('Категория: ', '');
+    }
+
+    // Получаем base64 из атрибута data или из другого источника
+    const base64FromElement = photoElement.dataset.imageBase64;
+
+    // Заполняем форму
+    document.getElementById('photoId').value = currentPhotoId;
+    document.getElementById('editTitle').value = title;
+    document.getElementById('editDescription').value = description.replace('Без описания', '');
+
+    // Устанавливаем изображение в превью
+    const previewImg = document.getElementById('photoPreview');
+    if (base64FromElement) {
+        previewImg.src = `data:image/jpeg;base64,${base64FromElement}`;
+        previewImg.style.display = 'block';
+    } else {
+        previewImg.style.display = 'none';
+    }
+
+    // Устанавливаем выбранную категорию
+    const categorySelect = document.getElementById('editCategory');
+    for (let option of categorySelect.options) {
+        if (option.text === categoryName) {
+            option.selected = true;
+            break;
+        }
+    }
+
+    // Показываем модальное окно
+    document.getElementById('editModal').style.display = 'block';
+}
+</script>
+
+</body>
+</html>

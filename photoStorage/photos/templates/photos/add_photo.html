@@ -1,0 +1,87 @@
+{% block content %}
+<style>
+  /* Общие стили для всей страницы */
+  body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+  }
+
+  /* Контейнер формы */
+  .add-photo-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: 0 auto 40px auto;
+  }
+
+  /* Заголовок формы */
+  .add-photo-container h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #2980b9;
+      text-align: center;
+  }
+
+  /* Стиль формы */
+  form {
+      display: flex;
+      flex-direction: column;
+  }
+
+  /* Элементы формы: поля и кнопка */
+  form p {
+      margin-bottom: 15px;
+  }
+
+  /* Поля ввода и textarea */
+  input[type="text"],
+  input[type="file"],
+  select,
+  textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      transition: border-color 0.3s;
+  }
+
+  /* Фокус для полей */
+  input[type="text"]:focus,
+  input[type="file"]:focus,
+  select:focus,
+  textarea:focus {
+      border-color: #2980b9;
+      outline: none;
+  }
+
+  /* Кнопка отправки */
+  button[type="submit"] {
+      padding: 10px 20px;
+      background-color: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+  }
+  button[type="submit"]:hover {
+      background-color: #3498db;
+  }
+</style>
+
+<div class="add-photo-container">
+  <h2>Добавить фото</h2>
+  <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Загрузить</button>
+  </form>
+</div>
+{% endblock %}
